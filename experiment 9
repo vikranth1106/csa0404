@@ -1,0 +1,77 @@
+writer
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <string.h>
+
+#define SHM_SIZE 1024
+
+int main() {
+   
+    key_t key = ftok("shmfile", 65);
+
+
+    int shmid = shmget(key, SHM_SIZE, 0666 | IPC_CREAT);
+    if (shmid == -1) {
+        perror("shmget");
+        exit(1);
+    }
+
+    char *str = (char *)shmat(shmid, (void *)0, 0);
+    if (str == (char *)(-1)) {
+        perror("shmat");
+        exit(1);
+    }
+
+
+    printf("Enter a message: ");
+    fgets(str, SHM_SIZE, stdin);
+
+    printf("Data written to shared memory: %s\n", str);
+
+
+    shmdt(str);
+
+    return 0;
+}
+reader
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+#define SHM_SIZE 1024  // Must match writer
+
+int main() {
+    // Generate the same key as writer
+    key_t key = ftok("shmfile", 65);
+
+    // Get the shared memory segment
+    int shmid = shmget(key, SHM_SIZE, 0666);
+    if (shmid == -1) {
+        perror("shmget");
+        exit(1);
+    }
+
+    // Attach shared memory to process
+    char *str = (char *)shmat(shmid, (void *)0, 0);
+    if (str == (char *)(-1)) {
+        perror("shmat");
+        exit(1);
+    }
+
+    // Read from shared memory
+    printf("Data read from shared memory: %s\n", str);
+
+    // Detach and remove shared memory
+    shmdt(str);
+    shmctl(shmid, IPC_RMID, NULL);
+
+    return 0;
+}
+output:
+1.Enter a message: hello
+Data written to shared memory: hello
+2.Data read from shared memory: hello

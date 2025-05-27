@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+int main() {
+    int fd;
+    char writeBuffer[] = "Hello, this is a test using UNIX file system calls.\n";
+    char readBuffer[100];
+
+  
+    fd = open("demo.txt", O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        perror("Error opening file");
+        return 1;
+    }
+
+
+    if (write(fd, writeBuffer, strlen(writeBuffer)) < 0) {
+        perror("Error writing to file");
+        close(fd);
+        return 1;
+    }
+
+
+    lseek(fd, 0, SEEK_SET);
+
+  
+    int bytesRead = read(fd, readBuffer, sizeof(readBuffer) - 1);
+    if (bytesRead < 0) {
+        perror("Error reading from file");
+        close(fd);
+        return 1;
+    }
+
+    readBuffer[bytesRead] = '\0'; 
+    printf("Content read from file:\n%s", readBuffer);
+
+
+    close(fd);
+
+    return 0;
+}
+output:
+Content read from file:
+Hello, this is a test using UNIX file system calls.

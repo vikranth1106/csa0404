@@ -1,0 +1,68 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 10
+#define MAX_PROCESSES 10
+
+int main() {
+    int blockSize[MAX_BLOCKS], processSize[MAX_PROCESSES];
+    int blockAllocated[MAX_BLOCKS] = {0};
+    int allocation[MAX_PROCESSES];
+    int numBlocks, numProcesses;
+
+    printf("Enter number of memory blocks: ");
+    scanf("%d", &numBlocks);
+    printf("Enter sizes of %d blocks:\n", numBlocks);
+    for (int i = 0; i < numBlocks; i++)
+        scanf("%d", &blockSize[i]);
+
+    printf("Enter number of processes: ");
+    scanf("%d", &numProcesses);
+    printf("Enter sizes of %d processes:\n", numProcesses);
+    for (int i = 0; i < numProcesses; i++) {
+        scanf("%d", &processSize[i]);
+        allocation[i] = -1; 
+    }
+
+   
+    for (int i = 0; i < numProcesses; i++) {
+        int worstIdx = -1;
+        for (int j = 0; j < numBlocks; j++) {
+            if (!blockAllocated[j] && blockSize[j] >= processSize[i]) {
+                if (worstIdx == -1 || blockSize[j] > blockSize[worstIdx]) {
+                    worstIdx = j;
+                }
+            }
+        }
+        if (worstIdx != -1) {
+            allocation[i] = worstIdx;
+            blockSize[worstIdx] -= processSize[i];
+           
+        }
+    }
+
+    printf("\nProcess No.\tProcess Size\tBlock No.\n");
+    for (int i = 0; i < numProcesses; i++) {
+        printf("%d\t\t%d\t\t", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("%d\n", allocation[i] + 1); 
+        else
+            printf("Not Allocated\n");
+    }
+
+    return 0;
+}
+output:
+Enter number of memory blocks: 4
+Enter sizes of 4 blocks:
+100
+200
+300
+400
+Enter number of processes: 2
+Enter sizes of 2 processes:
+10
+50
+
+Process No.	Process Size	Block No.
+1		10		4
+2		50		4

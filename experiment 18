@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 5
+
+int buffer[BUFFER_SIZE];
+int in = 0, out = 0;
+
+sem_t empty;   
+sem_t full;    
+pthread_mutex_t mutex; 
+
+void* producer(void *arg) {
+    int item, i = 0;
+    while (i < 10) {  
+        item = i + 1;
+
+        sem_wait(&empty);           
+        pthread_mutex_lock(&mutex); 
+        buffer[in] = item;
+        printf("Producer produced: %d at %d\n", item, in);
+        in = (in + 1) % BUFFER_SIZE;
+
+        pthread_mutex_unlock(&mutex); 
+        sem_post(&full);              
+
+        i++;
+        sleep(1);
+    }
+    return NULL;
+}
+
+void* consumer(void *arg) {
+    int item, i = 0;
+    while (i < 10) {  
+        sem_wait(&full);            
+        pthread_mutex_lock(&mutex); 
+
+        item = buffer[out];
+        printf("Consumer consumed: %d from %d\n", item, out);
+        out = (out + 1) % BUFFER_SIZE;
+
+        pthread_mutex_unlock(&mutex); 
+        sem_post(&empty);             
+
+        i++;
+        sleep(2);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t prod_thread, cons_thread;
+
+
+    sem_init(&empty, 0, BUFFER_SIZE);
+    sem_init(&full, 0, 0);
+    pthread_mutex_init(&mutex, NULL);
+
+
+    pthread_create(&prod_thread, NULL, producer, NULL);
+    pthread_create(&cons_thread, NULL, consumer, NULL);
+
+
+    pthread_join(prod_thread, NULL);
+    pthread_join(cons_thread, NULL);
+
+
+    sem_destroy(&empty);
+    sem_destroy(&full);
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
+output:
+Producer produced: 1 at 0
+Consumer consumed: 1 from 0
+Producer produced: 2 at 1
+Consumer consumed: 2 from 1
+Producer produced: 3 at 2
+Producer produced: 4 at 3
+Consumer consumed: 3 from 2
+Producer produced: 5 at 4
+Producer produced: 6 at 0
+Consumer consumed: 4 from 3
+Producer produced: 7 at 1
+Producer produced: 8 at 2
+Consumer consumed: 5 from 4
+Producer produced: 9 at 3
+Producer produced: 10 at 4
+Consumer consumed: 6 from 0
+Consumer consumed: 7 from 1
+Consumer consumed: 8 from 2
+Consumer consumed: 9 from 3
+Consumer consumed: 10 from 4

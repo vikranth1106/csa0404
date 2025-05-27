@@ -1,0 +1,199 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_USERS 10
+#define MAX_FILES 10
+#define NAME_SIZE 50
+
+typedef struct {
+    char filename[NAME_SIZE];
+} File;
+
+typedef struct {
+    char dirname[NAME_SIZE];
+    File files[MAX_FILES];
+    int file_count;
+} Directory;
+
+Directory users[MAX_USERS];
+int user_count = 0;
+
+void create_user_directory() {
+    if (user_count >= MAX_USERS) {
+        printf("Cannot add more users. Limit reached.\n");
+        return;
+    }
+
+    char name[NAME_SIZE];
+    printf("Enter user directory name: ");
+    scanf("%s", name);
+
+    // Check for duplicate
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].dirname, name) == 0) {
+            printf("User directory already exists!\n");
+            return;
+        }
+    }
+
+    strcpy(users[user_count].dirname, name);
+    users[user_count].file_count = 0;
+    user_count++;
+
+    printf("User directory '%s' created.\n", name);
+}
+
+int find_user(char *name) {
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].dirname, name) == 0)
+            return i;
+    }
+    return -1;
+}
+
+void create_file() {
+    char dirname[NAME_SIZE], filename[NAME_SIZE];
+    printf("Enter user directory name: ");
+    scanf("%s", dirname);
+
+    int idx = find_user(dirname);
+    if (idx == -1) {
+        printf("User directory not found.\n");
+        return;
+    }
+
+    if (users[idx].file_count >= MAX_FILES) {
+        printf("Directory is full. Cannot create more files.\n");
+        return;
+    }
+
+    printf("Enter file name to create: ");
+    scanf("%s", filename);
+
+    for (int i = 0; i < users[idx].file_count; i++) {
+        if (strcmp(users[idx].files[i].filename, filename) == 0) {
+            printf("File already exists in directory.\n");
+            return;
+        }
+    }
+
+    strcpy(users[idx].files[users[idx].file_count].filename, filename);
+    users[idx].file_count++;
+    printf("File '%s' created in directory '%s'.\n", filename, dirname);
+}
+
+void display_directory() {
+    for (int i = 0; i < user_count; i++) {
+        printf("\nUser Directory: %s\n", users[i].dirname);
+        if (users[i].file_count == 0) {
+            printf("  (No files)\n");
+        } else {
+            for (int j = 0; j < users[i].file_count; j++) {
+                printf("  - %s\n", users[i].files[j].filename);
+            }
+        }
+    }
+}
+
+void search_file() {
+    char dirname[NAME_SIZE], filename[NAME_SIZE];
+    printf("Enter user directory name: ");
+    scanf("%s", dirname);
+    int idx = find_user(dirname);
+
+    if (idx == -1) {
+        printf("User directory not found.\n");
+        return;
+    }
+
+    printf("Enter file name to search: ");
+    scanf("%s", filename);
+
+    for (int i = 0; i < users[idx].file_count; i++) {
+        if (strcmp(users[idx].files[i].filename, filename) == 0) {
+            printf("File '%s' found in directory '%s'.\n", filename, dirname);
+            return;
+        }
+    }
+    printf("File '%s' not found in directory '%s'.\n", filename, dirname);
+}
+
+void delete_file() {
+    char dirname[NAME_SIZE], filename[NAME_SIZE];
+    printf("Enter user directory name: ");
+    scanf("%s", dirname);
+    int idx = find_user(dirname);
+
+    if (idx == -1) {
+        printf("User directory not found.\n");
+        return;
+    }
+
+    printf("Enter file name to delete: ");
+    scanf("%s", filename);
+
+    for (int i = 0; i < users[idx].file_count; i++) {
+        if (strcmp(users[idx].files[i].filename, filename) == 0) {
+            for (int j = i; j < users[idx].file_count - 1; j++) {
+                strcpy(users[idx].files[j].filename, users[idx].files[j + 1].filename);
+            }
+            users[idx].file_count--;
+            printf("File '%s' deleted from directory '%s'.\n", filename, dirname);
+            return;
+        }
+    }
+
+    printf("File not found.\n");
+}
+int main() {
+    int choice;
+
+    while (1) {
+        printf("\n--- Two-Level Directory Structure ---\n");
+        printf("1. Create User Directory\n");
+        printf("2. Create File\n");
+        printf("3. Delete File\n");
+        printf("4. Search File\n");
+        printf("5. Display All Directories\n");
+        printf("6. Exit\n");
+
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: create_user_directory(); break;
+            case 2: create_file(); break;
+            case 3: delete_file(); break;
+            case 4: search_file(); break;
+            case 5: display_directory(); break;
+            case 6: return 0;
+            default: printf("Invalid choice. Try again.\n");
+        }
+    }
+
+    return 0;
+}
+output:
+
+--- Two-Level Directory Structure ---
+1. Create User Directory
+2. Create File
+3. Delete File
+4. Search File
+5. Display All Directories
+6. Exit
+Enter your choice: 1
+Enter user directory name: sru.txt
+User directory 'sru.txt' created.
+
+--- Two-Level Directory Structure ---
+1. Create User Directory
+2. Create File
+3. Delete File
+4. Search File
+5. Display All Directories
+6. Exit
+Enter your choice: 5
+
+User Directory: sru.txt
+  (No files)

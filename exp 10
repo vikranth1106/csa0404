@@ -1,0 +1,79 @@
+sender:
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <string.h>
+
+
+struct mesg_buffer {
+    long mesg_type;
+    char mesg_text[100];
+};
+
+int main() {
+    key_t key;
+    int msgid;
+
+
+    key = ftok("progfile", 65);
+
+
+    msgid = msgget(key, 0666 | IPC_CREAT);
+    if (msgid == -1) {
+        perror("msgget");
+        exit(1);
+    }
+
+    struct mesg_buffer message;
+    message.mesg_type = 1;
+
+    printf("Enter message: ");
+    fgets(message.mesg_text, sizeof(message.mesg_text), stdin);
+
+    msgsnd(msgid, &message, sizeof(message.mesg_text), 0);
+
+    printf("Message sent: %s\n", message.mesg_text);
+
+    return 0;
+}
+receiver:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+
+struct mesg_buffer {
+    long mesg_type;
+    char mesg_text[100];
+};
+
+int main() {
+    key_t key;
+    int msgid;
+
+    key = ftok("progfile", 65);
+
+    msgid = msgget(key, 0666 | IPC_CREAT);
+    if (msgid == -1) {
+        perror("msgget");
+        exit(1);
+    }
+
+    struct mesg_buffer message;
+
+
+    msgrcv(msgid, &message, sizeof(message.mesg_text), 1, 0);
+
+    printf("Received message: %s\n", message.mesg_text);
+
+    msgctl(msgid, IPC_RMID, NULL);
+
+    return 0;
+}
+output:
+1.Enter message: how are you
+Message sent: how are you
+2.Received message: how are you

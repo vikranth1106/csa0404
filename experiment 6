@@ -1,0 +1,101 @@
+#include <stdio.h>
+
+#define MAX 100
+
+struct Process {
+    int pid;              
+    int arrival_time;     
+    int burst_time;      
+    int remaining_time;   
+    int priority;         
+    int waiting_time;     
+    int turnaround_time;  
+    int completed;        
+};
+
+int main() {
+    struct Process p[MAX];
+    int n, time = 0, completed = 0;
+    int min_priority, shortest = -1;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; i++) {
+        p[i].pid = i + 1;
+        printf("Enter arrival time for Process %d: ", p[i].pid);
+        scanf("%d", &p[i].arrival_time);
+        printf("Enter burst time for Process %d: ", p[i].pid);
+        scanf("%d", &p[i].burst_time);
+        printf("Enter priority for Process %d (lower = higher priority): ", p[i].pid);
+        scanf("%d", &p[i].priority);
+        p[i].remaining_time = p[i].burst_time;
+        p[i].completed = 0;
+    }
+
+
+    while (completed < n) {
+        min_priority = 9999;
+        shortest = -1;
+
+        for (int i = 0; i < n; i++) {
+            if (p[i].arrival_time <= time && p[i].completed == 0 && p[i].priority < min_priority && p[i].remaining_time > 0) {
+                min_priority = p[i].priority;
+                shortest = i;
+            }
+        }
+
+        if (shortest == -1) {
+            time++;  
+            continue;
+        }
+
+
+        p[shortest].remaining_time--;
+        time++;
+
+
+        if (p[shortest].remaining_time == 0) {
+            p[shortest].completed = 1;
+            completed++;
+
+            int finish_time = time;
+            p[shortest].turnaround_time = finish_time - p[shortest].arrival_time;
+            p[shortest].waiting_time = p[shortest].turnaround_time - p[shortest].burst_time;
+        }
+    }
+
+
+    printf("\nPreemptive Priority Scheduling:\n");
+    printf("PID\tArrival\tBurst\tPriority\tWaiting\tTurnaround\n");
+    float total_wait = 0, total_tat = 0;
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t\t%d\t%d\n",
+               p[i].pid, p[i].arrival_time, p[i].burst_time, p[i].priority,
+               p[i].waiting_time, p[i].turnaround_time);
+        total_wait += p[i].waiting_time;
+        total_tat += p[i].turnaround_time;
+    }
+
+    printf("\nAverage Waiting Time    : %.2f", total_wait / n);
+    printf("\nAverage Turnaround Time : %.2f\n", total_tat / n);
+
+    return 0;
+}
+output:
+Enter the number of processes: 2
+Enter arrival time for Process 1: 3
+Enter burst time for Process 1: 1
+Enter priority for Process 1 (lower = higher priority): 6
+Enter arrival time for Process 2: 5
+Enter burst time for Process 2: 7
+Enter priority for Process 2 (lower = higher priority): 5
+
+Preemptive Priority Scheduling:
+PID	Arrival	Burst	Priority	Waiting	Turnaround
+1	3	1	6		0	1
+2	5	7	5		0	7
+
+Average Waiting Time    : 0.00
+Average Turnaround Time : 4.00

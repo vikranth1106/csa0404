@@ -1,0 +1,160 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 10
+#define MAX_PROCESSES 10
+
+// First Fit
+void firstFit(int blockSize[], int blocks, int processSize[], int processes) {
+    int allocation[MAX_PROCESSES];
+    int tempBlockSize[MAX_BLOCKS];
+
+    for (int i = 0; i < blocks; i++)
+        tempBlockSize[i] = blockSize[i];
+
+    for (int i = 0; i < processes; i++) {
+        allocation[i] = -1;
+        for (int j = 0; j < blocks; j++) {
+            if (tempBlockSize[j] >= processSize[i]) {
+                allocation[i] = j;
+                tempBlockSize[j] -= processSize[i];
+                break;
+            }
+        }
+    }
+
+    printf("\nFirst Fit Allocation:\n");
+    for (int i = 0; i < processes; i++) {
+        printf("Process %d (Size %d) -> ", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("Block %d\n", allocation[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+// Best Fit
+void bestFit(int blockSize[], int blocks, int processSize[], int processes) {
+    int allocation[MAX_PROCESSES];
+    int tempBlockSize[MAX_BLOCKS];
+
+    for (int i = 0; i < blocks; i++)
+        tempBlockSize[i] = blockSize[i];
+
+    for (int i = 0; i < processes; i++) {
+        int bestIdx = -1;
+        for (int j = 0; j < blocks; j++) {
+            if (tempBlockSize[j] >= processSize[i]) {
+                if (bestIdx == -1 || tempBlockSize[j] < tempBlockSize[bestIdx])
+                    bestIdx = j;
+            }
+        }
+
+        if (bestIdx != -1) {
+            allocation[i] = bestIdx;
+            tempBlockSize[bestIdx] -= processSize[i];
+        } else {
+            allocation[i] = -1;
+        }
+    }
+
+    printf("\nBest Fit Allocation:\n");
+    for (int i = 0; i < processes; i++) {
+        printf("Process %d (Size %d) -> ", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("Block %d\n", allocation[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+// Worst Fit
+void worstFit(int blockSize[], int blocks, int processSize[], int processes) {
+    int allocation[MAX_PROCESSES];
+    int tempBlockSize[MAX_BLOCKS];
+
+    for (int i = 0; i < blocks; i++)
+        tempBlockSize[i] = blockSize[i];
+
+    for (int i = 0; i < processes; i++) {
+        int worstIdx = -1;
+        for (int j = 0; j < blocks; j++) {
+            if (tempBlockSize[j] >= processSize[i]) {
+                if (worstIdx == -1 || tempBlockSize[j] > tempBlockSize[worstIdx])
+                    worstIdx = j;
+            }
+        }
+
+        if (worstIdx != -1) {
+            allocation[i] = worstIdx;
+            tempBlockSize[worstIdx] -= processSize[i];
+        } else {
+            allocation[i] = -1;
+        }
+    }
+
+    printf("\nWorst Fit Allocation:\n");
+    for (int i = 0; i < processes; i++) {
+        printf("Process %d (Size %d) -> ", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("Block %d\n", allocation[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+int main() {
+    int blockSize[MAX_BLOCKS], processSize[MAX_PROCESSES];
+    int blocks, processes;
+
+    printf("Enter number of memory blocks: ");
+    scanf("%d", &blocks);
+    printf("Enter size of each memory block:\n");
+    for (int i = 0; i < blocks; i++) {
+        printf("Block %d: ", i + 1);
+        scanf("%d", &blockSize[i]);
+    }
+
+    printf("\nEnter number of processes: ");
+    scanf("%d", &processes);
+    printf("Enter size of each process:\n");
+    for (int i = 0; i < processes; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d", &processSize[i]);
+    }
+
+    firstFit(blockSize, blocks, processSize, processes);
+    bestFit(blockSize, blocks, processSize, processes);
+    worstFit(blockSize, blocks, processSize, processes);
+
+    return 0;
+}
+output:
+Enter number of memory blocks: 2
+Enter size of each memory block:
+Block 1: 56
+Block 2: 20
+
+Enter number of processes: 4
+Enter size of each process:
+Process 1: 5
+Process 2: 5
+Process 3: 8
+Process 4: 9
+
+First Fit Allocation:
+Process 1 (Size 5) -> Block 1
+Process 2 (Size 5) -> Block 1
+Process 3 (Size 8) -> Block 1
+Process 4 (Size 9) -> Block 1
+
+Best Fit Allocation:
+Process 1 (Size 5) -> Block 2
+Process 2 (Size 5) -> Block 2
+Process 3 (Size 8) -> Block 2
+Process 4 (Size 9) -> Block 1
+
+Worst Fit Allocation:
+Process 1 (Size 5) -> Block 1
+Process 2 (Size 5) -> Block 1
+Process 3 (Size 8) -> Block 1
+Process 4 (Size 9) -> Block 1

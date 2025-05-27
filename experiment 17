@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_PROCESSES 10
+#define MAX_RESOURCES 10
+
+int main() {
+    int n, m; 
+    int allocation[MAX_PROCESSES][MAX_RESOURCES];
+    int max[MAX_PROCESSES][MAX_RESOURCES];
+    int need[MAX_PROCESSES][MAX_RESOURCES];
+    int available[MAX_RESOURCES];
+    bool finish[MAX_PROCESSES] = {false};
+    int safeSeq[MAX_PROCESSES];
+    int count = 0;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+    printf("Enter number of resource types: ");
+    scanf("%d", &m);
+
+    printf("Enter Allocation Matrix:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            scanf("%d", &allocation[i][j]);
+
+    printf("Enter Maximum Matrix:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            scanf("%d", &max[i][j]);
+
+    printf("Enter Available Resources:\n");
+    for (int j = 0; j < m; j++)
+        scanf("%d", &available[j]);
+
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            need[i][j] = max[i][j] - allocation[i][j];
+
+    while (count < n) {
+        bool found = false;
+        for (int i = 0; i < n; i++) {
+            if (!finish[i]) {
+                bool canAllocate = true;
+                for (int j = 0; j < m; j++) {
+                    if (need[i][j] > available[j]) {
+                        canAllocate = false;
+                        break;
+                    }
+                }
+                if (canAllocate) {
+                    for (int j = 0; j < m; j++)
+                        available[j] += allocation[i][j];
+                    safeSeq[count++] = i;
+                    finish[i] = true;
+                    found = true;
+                }
+            }
+        }
+        if (!found) break;  state
+    }
+
+    if (count == n) {
+        printf("System is in a safe state.\nSafe sequence is: ");
+        for (int i = 0; i < n; i++)
+            printf("P%d ", safeSeq[i]);
+        printf("\n");
+    } else {
+        printf("System is NOT in a safe state! Deadlock possible.\n");
+    }
+
+    return 0;
+}
+output:
+Enter number of processes: 5
+Enter number of resource types: 3
+
+Enter Allocation Matrix:
+0 1 0
+2 0 0
+3 0 2
+2 1 1
+0 0 2
+
+Enter Maximum Matrix:
+7 5 3
+3 2 2
+9 0 2
+2 2 2
+4 3 3
+
+Enter Available Resources:
+3 3 2
